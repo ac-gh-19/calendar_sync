@@ -15,7 +15,7 @@ The JSON must follow this exact schema:
       "days": ["monday", "wednesday"],
       "start_time": "HH:MM",
       "end_time": "HH:MM",
-      "type": "lecture | office_hours | exam | deadline",
+      "type": "lecture | office_hours | exam | deadline | lab",
       "location": "string | null",
       "description": "string | null"
     }
@@ -26,7 +26,7 @@ The JSON must follow this exact schema:
       "date": "YYYY-MM-DD | null",
       "start_time": "HH:MM",
       "end_time": "HH:MM",
-      "type": "lecture | office_hours | exam | deadline",
+      "type": "lecture | office_hours | exam | deadline | lab",
       "location": "string | null"
     }
   ],
@@ -39,6 +39,7 @@ Rules:
 - Your job is PATTERN EXTRACTION, not event generation. Return recurring patterns (e.g. "days": ["tuesday", "thursday"]), NOT individual event objects for each date.
 - Use the provided quarter start and end dates to resolve any relative date references (e.g. "Week 3 Monday", "the second Tuesday of the quarter").
 - For one-off events where the exact date cannot be determined even with the quarter dates, set "date" to null.
+- For ANY event where the start or end time is not specified or remains "TBD", set "start_time" and "end_time" to null.
 - Use 24-hour time format (HH:MM).
 - Lowercase day names.
 - Include holidays, breaks, or cancelled class dates in "exceptions".

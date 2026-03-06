@@ -1,7 +1,7 @@
 require('dotenv').config();
 const { extractText } = require('./pdf_extractor');
 const { parseSyllabus } = require('./llm_parser');
-const { combineEvents } = require('./date_expander');
+const { processOneOffs } = require('./date_expander');
 const { authorize, createEvents, createRecurringEvents } = require('./calendar_client');
 const { getQuarterDates } = require('./cli');
 const { selectEvents } = require('./event_selector');
@@ -22,7 +22,7 @@ async function run(pdfPath) {
 
     // Stage 3: Parse with Claude
     console.log('\n--- Stage 3: LLM Parsing ---');
-    const result = await parseSyllabus(text, quarterStart, quarterEnd);
+    let result = await parseSyllabus(text, quarterStart, quarterEnd);
 
     // Stage 4: Let user select which events to keep
     console.log('\n--- Event Selection ---');
@@ -50,11 +50,7 @@ async function run(pdfPath) {
     }
 
     // Create one-off events individually
-    const oneOffEvents = combineEvents(
-        { recurring: [], one_off: result.one_off, exceptions: [] },
-        quarterStart,
-        quarterEnd
-    );
+    const oneOffEvents = processOneOffs(result.one_off);
 
     if (oneOffEvents.length > 0) {
         console.log(`\nCreating ${oneOffEvents.length} one-off events...`);

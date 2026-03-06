@@ -171,8 +171,13 @@ async function createRecurringEvents(auth, recurringPatterns, exceptions, quarte
             .filter(Boolean)
             .join(',');
 
-        if (!byDay) {
-            failures.push({ event: pattern, error: 'No valid days found' });
+        const timeRegex = /^\d{2}:\d{2}$/;
+        const hasValidTime = pattern.start_time && timeRegex.test(pattern.start_time) &&
+            pattern.end_time && timeRegex.test(pattern.end_time);
+
+        if (!byDay || !hasValidTime) {
+            const reason = !byDay ? 'No valid days' : 'Invalid/missing times';
+            failures.push({ event: pattern, error: reason });
             continue;
         }
 

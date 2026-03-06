@@ -84,7 +84,8 @@ async function getQuarterDates() {
     }
 
     // --- Get end date ---
-    const maxEnd = addMonths(startDate, 5);
+    const num_months = 4;
+    const maxEnd = addMonths(startDate, num_months);
     let endDate;
     let endStr;
 
@@ -103,7 +104,7 @@ async function getQuarterDates() {
         }
 
         if (endDate > maxEnd) {
-            console.log(`  End date must be within 5 months of start date (no later than ${maxEnd.toISOString().split('T')[0]}).`);
+            console.log(`  End date must be within ${num_months} months of start date (no later than ${maxEnd.toISOString().split('T')[0]}).`);
             continue;
         }
 

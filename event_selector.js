@@ -37,7 +37,10 @@ async function selectEvents(llmResult) {
         recurring.forEach((e, i) => {
             const days = e.days.join(', ');
             const loc = e.location ? ` @ ${e.location}` : '';
-            console.log(`  [${i + 1}] ${e.title} — ${days} ${e.start_time}-${e.end_time} [${e.type}]${loc}`);
+            const startTime = e.start_time || 'TBD';
+            const endTime = e.end_time || 'TBD';
+            const skipWarning = (startTime === 'TBD' || endTime === 'TBD') ? ' [⚠️ SKIPS ON UPLOAD]' : '';
+            console.log(`  [${i + 1}] ${e.title} — ${days} ${startTime}-${endTime} [${e.type}]${loc}${skipWarning}`);
         });
     }
 
@@ -49,7 +52,10 @@ async function selectEvents(llmResult) {
         oneOff.forEach((e, i) => {
             const date = e.date || 'TBD';
             const loc = e.location ? ` @ ${e.location}` : '';
-            console.log(`  [${offset + i + 1}] ${e.title} — ${date} ${e.start_time}-${e.end_time} [${e.type}]${loc}`);
+            const startTime = e.start_time || 'TBD';
+            const endTime = e.end_time || 'TBD';
+            const skipWarning = (date === 'TBD' || startTime === 'TBD' || endTime === 'TBD') ? ' [⚠️ SKIPS ON UPLOAD]' : '';
+            console.log(`  [${offset + i + 1}] ${e.title} — ${date} ${startTime}-${endTime} [${e.type}]${loc}${skipWarning}`);
         });
     }
 
