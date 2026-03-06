@@ -27,7 +27,7 @@ The JSON must follow this exact schema:
       "date": "YYYY-MM-DD | null",
       "start_time": "HH:MM",
       "end_time": "HH:MM",
-      "type": "lecture | office_hours | exam | deadline",
+      "type": "ex",
       "location": "string | null",
       "needs_clarification": boolean
     }
