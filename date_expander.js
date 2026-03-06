@@ -63,9 +63,10 @@ function combineEvents(llmResult, quarterStart, quarterEnd) {
         quarterEnd
     );
 
-    // Filter one-off events: only keep those with actual dates
+    // Filter one-off events: only keep those with valid YYYY-MM-DD dates
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     const validOneOffs = (llmResult.one_off || [])
-        .filter(e => e.date !== null && e.date !== undefined)
+        .filter(e => e.date && typeof e.date === 'string' && dateRegex.test(e.date))
         .map(e => ({
             title: e.title,
             date: e.date,
