@@ -2,7 +2,7 @@ require('dotenv').config();
 const { extractText } = require('./pdf_extractor');
 const { parseSyllabus } = require('./llm_parser');
 const { combineEvents } = require('./date_expander');
-const { authorize, createEvents } = require('./calendar_client');
+const { authorize, createEvents, createRecurringEvents } = require('./calendar_client');
 const { getQuarterDates } = require('./cli');
 const { selectEvents } = require('./event_selector');
 
@@ -16,52 +16,62 @@ async function run(pdfPath) {
     console.log('\n--- Stage 1: PDF Extraction ---');
     const text = await extractText(pdfPath);
 
-    // Stage 2: Parse with Claude (first pass)
-    console.log('\n--- Stage 2: LLM Parsing ---');
-    let result = await parseSyllabus(text);
+    // Stage 2: Get quarter dates
+    console.log('\n--- Stage 2: Quarter Date Range ---');
+    const { start: quarterStart, end: quarterEnd } = await getQuarterDates();
 
-    // Stage 3: Get quarter dates if needed, then expand
-    console.log('\n--- Stage 3: Date Expansion ---');
-    let quarterStart, quarterEnd;
+    // Stage 3: Parse with Claude
+    console.log('\n--- Stage 3: LLM Parsing ---');
+    const result = await parseSyllabus(text, quarterStart, quarterEnd);
 
-    if (result.has_ambiguous_dates || result.recurring.length > 0) {
-        console.log('Recurring events detected — need quarter range.');
-        ({ start: quarterStart, end: quarterEnd } = await getQuarterDates());
-
-        // Re-parse with quarter context for better date resolution
-        console.log('Re-parsing with quarter dates for better accuracy...');
-        result = await parseSyllabus(text, quarterStart, quarterEnd);
-    }
-
-    // Stage 2.5: Let user select which events to keep
+    // Stage 4: Let user select which events to keep
     console.log('\n--- Event Selection ---');
     result = await selectEvents(result);
 
-    const allEvents = combineEvents(result, quarterStart, quarterEnd);
-
-    if (allEvents.length === 0) {
-        console.log('No events to create. Exiting.');
-        return;
-    }
-
-    // Preview events
-    console.log('\nEvent preview (first 5):');
-    for (const event of allEvents.slice(0, 5)) {
-        console.log(`  ${event.date} ${event.start_time}-${event.end_time} | ${event.title} [${event.type}]`);
-    }
-    if (allEvents.length > 5) {
-        console.log(`  ... and ${allEvents.length - 5} more`);
-    }
-
-    // Stage 4: Push to Google Calendar
-    console.log('\n--- Stage 4: Google Calendar ---');
+    // Stage 5: Push to Google Calendar
+    console.log('\n--- Stage 5: Google Calendar ---');
     const auth = await authorize();
-    const { created, failed } = await createEvents(auth, allEvents);
 
-    console.log(`\nDone! Created ${created} calendar events.`);
-    if (failed.length > 0) {
-        console.log(`${failed.length} event(s) failed — see errors above.`);
+    let totalCreated = 0;
+    const allFailures = [];
+
+    // Create recurring events as RRULE series (one API call per pattern)
+    if (result.recurring.length > 0 && quarterStart && quarterEnd) {
+        console.log(`\nCreating ${result.recurring.length} recurring event series...`);
+        const recurResult = await createRecurringEvents(
+            auth,
+            result.recurring,
+            result.exceptions || [],
+            quarterStart,
+            quarterEnd
+        );
+        totalCreated += recurResult.created;
+        allFailures.push(...recurResult.failed);
     }
+
+    // Create one-off events individually
+    const oneOffEvents = combineEvents(
+        { recurring: [], one_off: result.one_off, exceptions: [] },
+        quarterStart,
+        quarterEnd
+    );
+
+    if (oneOffEvents.length > 0) {
+        console.log(`\nCreating ${oneOffEvents.length} one-off events...`);
+        const oneOffResult = await createEvents(auth, oneOffEvents);
+        totalCreated += oneOffResult.created;
+        allFailures.push(...oneOffResult.failed);
+    }
+
+    // Summary
+    if (allFailures.length > 0) {
+        console.log(`\nFailed to create ${allFailures.length} event(s):`);
+        for (const f of allFailures) {
+            console.log(`  - ${f.event.title}: ${f.error}`);
+        }
+    }
+
+    console.log(`\nDone! Created ${totalCreated} calendar entries (${result.recurring.length} recurring series + ${oneOffEvents.length} one-off).`);
 }
 
 // Entry point

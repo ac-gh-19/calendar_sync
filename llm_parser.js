@@ -3,13 +3,12 @@ const Anthropic = require('@anthropic-ai/sdk');
 
 const client = new Anthropic();
 
-const SYSTEM_PROMPT = `You are a schedule extraction assistant. Given the text of a course syllabus, extract ALL schedule information into a structured JSON object.
+const SYSTEM_PROMPT = `You are a schedule extraction assistant. Given the text of a course syllabus and the quarter date range, extract ALL schedule information into a structured JSON object.
 
 Return ONLY raw JSON — no markdown, no code fences, no preamble, no explanation.
 
 The JSON must follow this exact schema:
 {
-  "has_ambiguous_dates": boolean,
   "recurring": [
     {
       "title": "string",
@@ -27,9 +26,8 @@ The JSON must follow this exact schema:
       "date": "YYYY-MM-DD | null",
       "start_time": "HH:MM",
       "end_time": "HH:MM",
-      "type": "ex",
-      "location": "string | null",
-      "needs_clarification": boolean
+      "type": "lecture | office_hours | exam | deadline",
+      "location": "string | null"
     }
   ],
   "exceptions": [
@@ -39,8 +37,8 @@ The JSON must follow this exact schema:
 
 Rules:
 - Your job is PATTERN EXTRACTION, not event generation. Return recurring patterns (e.g. "days": ["tuesday", "thursday"]), NOT individual event objects for each date.
-- Set "has_ambiguous_dates" to true if the syllabus uses relative references like "Week 3 Monday" without specific calendar dates.
-- For one-off events where the exact date cannot be determined, set "date" to null and "needs_clarification" to true.
+- Use the provided quarter start and end dates to resolve any relative date references (e.g. "Week 3 Monday", "the second Tuesday of the quarter").
+- For one-off events where the exact date cannot be determined even with the quarter dates, set "date" to null.
 - Use 24-hour time format (HH:MM).
 - Lowercase day names.
 - Include holidays, breaks, or cancelled class dates in "exceptions".
@@ -49,16 +47,12 @@ Rules:
 /**
  * Parses syllabus text using Claude to extract structured schedule data.
  * @param {string} text - Raw syllabus text
- * @param {string} [quarterStart] - Optional quarter start date (YYYY-MM-DD)
- * @param {string} [quarterEnd] - Optional quarter end date (YYYY-MM-DD)
+ * @param {string} quarterStart - Quarter start date (YYYY-MM-DD)
+ * @param {string} quarterEnd - Quarter end date (YYYY-MM-DD)
  * @returns {Promise<Object>} Structured schedule JSON
  */
 async function parseSyllabus(text, quarterStart, quarterEnd) {
-    let userMessage = `Extract the schedule from this syllabus:\n\n${text}`;
-
-    if (quarterStart && quarterEnd) {
-        userMessage += `\n\nThe academic quarter runs from ${quarterStart} to ${quarterEnd}. Use these dates to resolve any relative date references (e.g. "Week 1" starts on ${quarterStart}).`;
-    }
+    let userMessage = `Extract the schedule from this syllabus.\n\nThe academic quarter runs from ${quarterStart} to ${quarterEnd}. Use these dates to resolve any relative date references (e.g. "Week 1" starts on ${quarterStart}).\n\nSyllabus text:\n\n${text}`;
 
     console.log('Sending syllabus to Claude for parsing...');
 
@@ -93,14 +87,8 @@ async function parseSyllabus(text, quarterStart, quarterEnd) {
     if (!Array.isArray(parsed.recurring)) parsed.recurring = [];
     if (!Array.isArray(parsed.one_off)) parsed.one_off = [];
     if (!Array.isArray(parsed.exceptions)) parsed.exceptions = [];
-    if (typeof parsed.has_ambiguous_dates !== 'boolean') parsed.has_ambiguous_dates = false;
 
-    const totalEvents = parsed.recurring.length + parsed.one_off.length;
     console.log(`Parsed ${parsed.recurring.length} recurring patterns, ${parsed.one_off.length} one-off events, ${parsed.exceptions.length} exceptions`);
-
-    if (parsed.has_ambiguous_dates) {
-        console.log('Ambiguous dates detected — quarter range may be needed for resolution.');
-    }
 
     return parsed;
 }

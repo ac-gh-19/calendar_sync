@@ -124,7 +124,7 @@ async function createEvents(auth, events) {
                 resource: calendarEvent,
             });
             created++;
-            process.stdout.write(`\rCreating events... ${created}/${events.length}`);
+            process.stdout.write(`\rCreating one-off events... ${created}/${events.length}`);
         } catch (err) {
             failures.push({
                 event: event,
@@ -133,18 +133,120 @@ async function createEvents(auth, events) {
         }
     }
 
-    console.log(''); // newline after progress
-
-    if (failures.length > 0) {
-        console.log(`\nFailed to create ${failures.length} event(s):`);
-        for (const f of failures) {
-            console.log(`  - ${f.event.title} on ${f.event.date}: ${f.error}`);
-        }
-    }
-
-    console.log(`Created ${created} of ${events.length} calendar events`);
+    if (events.length > 0) console.log('');
 
     return { created, failed: failures };
 }
 
-module.exports = { authorize, createEvents };
+/**
+ * Maps day names to RRULE BYDAY abbreviations.
+ */
+const RRULE_DAY_MAP = {
+    sunday: 'SU', monday: 'MO', tuesday: 'TU', wednesday: 'WE',
+    thursday: 'TH', friday: 'FR', saturday: 'SA'
+};
+
+/**
+ * Creates native Google Calendar recurring events using RRULE.
+ * Each recurring pattern becomes a single calendar series with exceptions as EXDATE.
+ * @param {google.auth.OAuth2} auth - Authenticated OAuth2 client
+ * @param {Array} recurringPatterns - Recurring event patterns from LLM
+ * @param {Array} exceptions - Exception dates to exclude
+ * @param {string} quarterStart - Start date (YYYY-MM-DD)
+ * @param {string} quarterEnd - End date (YYYY-MM-DD)
+ * @returns {Promise<{created: number, failed: Array}>} Results summary
+ */
+async function createRecurringEvents(auth, recurringPatterns, exceptions, quarterStart, quarterEnd) {
+    const calendar = google.calendar({ version: 'v3', auth });
+    const failures = [];
+    let created = 0;
+
+    // Format UNTIL date for RRULE (end of day in UTC: YYYYMMDDTHHMMSSZ)
+    const untilDate = quarterEnd.replace(/-/g, '') + 'T235959Z';
+
+    for (const pattern of recurringPatterns) {
+        // Build BYDAY string (e.g. "MO,WE,FR")
+        const byDay = pattern.days
+            .map(d => RRULE_DAY_MAP[d.toLowerCase()])
+            .filter(Boolean)
+            .join(',');
+
+        if (!byDay) {
+            failures.push({ event: pattern, error: 'No valid days found' });
+            continue;
+        }
+
+        // Build recurrence rules
+        const recurrence = [`RRULE:FREQ=WEEKLY;BYDAY=${byDay};UNTIL=${untilDate}`];
+
+        // Add exception dates (EXDATE) for this pattern's days
+        const patternDayNums = pattern.days.map(d => {
+            const map = { sunday: 0, monday: 1, tuesday: 2, wednesday: 3, thursday: 4, friday: 5, saturday: 6 };
+            return map[d.toLowerCase()];
+        });
+
+        for (const exc of exceptions) {
+            const excDate = new Date(exc.date + 'T00:00:00');
+            if (patternDayNums.includes(excDate.getDay())) {
+                // EXDATE needs to match the start dateTime exactly
+                const excFormatted = exc.date.replace(/-/g, '');
+                recurrence.push(`EXDATE;TZID=${TIMEZONE}:${excFormatted}T${pattern.start_time.replace(':', '')}00`);
+            }
+        }
+
+        // Find the first occurrence date (first matching day on or after quarterStart)
+        const startDate = findFirstOccurrence(quarterStart, patternDayNums);
+        if (!startDate) {
+            failures.push({ event: pattern, error: 'Could not find first occurrence' });
+            continue;
+        }
+
+        const calendarEvent = {
+            summary: pattern.title,
+            location: pattern.location || undefined,
+            description: pattern.description || undefined,
+            start: {
+                dateTime: `${startDate}T${pattern.start_time}:00`,
+                timeZone: TIMEZONE,
+            },
+            end: {
+                dateTime: `${startDate}T${pattern.end_time}:00`,
+                timeZone: TIMEZONE,
+            },
+            recurrence: recurrence,
+        };
+
+        try {
+            await calendar.events.insert({
+                calendarId: 'primary',
+                resource: calendarEvent,
+            });
+            created++;
+            const days = pattern.days.join(', ');
+            console.log(`  Created recurring: ${pattern.title} (${days}) — ${created}/${recurringPatterns.length}`);
+        } catch (err) {
+            failures.push({
+                event: pattern,
+                error: err.message,
+            });
+        }
+    }
+
+    return { created, failed: failures };
+}
+
+/**
+ * Finds the first date on or after startDate that falls on one of the target day numbers.
+ */
+function findFirstOccurrence(startDateStr, targetDayNums) {
+    const cursor = new Date(startDateStr + 'T00:00:00');
+    for (let i = 0; i < 7; i++) {
+        if (targetDayNums.includes(cursor.getDay())) {
+            return cursor.toISOString().split('T')[0];
+        }
+        cursor.setDate(cursor.getDate() + 1);
+    }
+    return null;
+}
+
+module.exports = { authorize, createEvents, createRecurringEvents };
