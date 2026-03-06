@@ -1,0 +1,19 @@
+{
+  "name": "syllabus-calendar-sync",
+  "version": "1.0.0",
+  "description": "CLI tool that parses a PDF syllabus and populates Google Calendar",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
+    "dotenv": "^17.3.1",
+    "googleapis": "^171.4.0",
+    "pdf-parse": "^2.4.5"
+  }
+}
