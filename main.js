@@ -4,6 +4,7 @@ const { parseSyllabus } = require('./llm_parser');
 const { combineEvents } = require('./date_expander');
 const { authorize, createEvents } = require('./calendar_client');
 const { getQuarterDates } = require('./cli');
+const { selectEvents } = require('./event_selector');
 
 async function run(pdfPath) {
     if (!pdfPath) {
@@ -31,6 +32,10 @@ async function run(pdfPath) {
         console.log('Re-parsing with quarter dates for better accuracy...');
         result = await parseSyllabus(text, quarterStart, quarterEnd);
     }
+
+    // Stage 2.5: Let user select which events to keep
+    console.log('\n--- Event Selection ---');
+    result = await selectEvents(result);
 
     const allEvents = combineEvents(result, quarterStart, quarterEnd);
 

@@ -63,10 +63,15 @@ function combineEvents(llmResult, quarterStart, quarterEnd) {
         quarterEnd
     );
 
-    // Filter one-off events: only keep those with valid YYYY-MM-DD dates
+    // Filter one-off events: must have valid YYYY-MM-DD date and HH:MM times
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    const timeRegex = /^\d{2}:\d{2}$/;
     const validOneOffs = (llmResult.one_off || [])
-        .filter(e => e.date && typeof e.date === 'string' && dateRegex.test(e.date))
+        .filter(e => {
+            const hasDate = e.date && typeof e.date === 'string' && dateRegex.test(e.date);
+            const hasTime = e.start_time && timeRegex.test(e.start_time) && e.end_time && timeRegex.test(e.end_time);
+            return hasDate && hasTime;
+        })
         .map(e => ({
             title: e.title,
             date: e.date,
@@ -79,16 +84,16 @@ function combineEvents(llmResult, quarterStart, quarterEnd) {
 
     const skippedCount = (llmResult.one_off || []).length - validOneOffs.length;
     if (skippedCount > 0) {
-        console.log(`Skipped ${skippedCount} one-off event(s) with no date (need clarification)`);
+        console.log(`Skipped ${skippedCount} one-off event(s) with missing date or times`);
     }
 
     const allEvents = [...expanded, ...validOneOffs];
 
-    // Sort by date, then start_time
+    // Sort by date, then start_time (with null-safe fallbacks)
     allEvents.sort((a, b) => {
-        const dateCompare = a.date.localeCompare(b.date);
+        const dateCompare = (a.date || '').localeCompare(b.date || '');
         if (dateCompare !== 0) return dateCompare;
-        return a.start_time.localeCompare(b.start_time);
+        return (a.start_time || '').localeCompare(b.start_time || '');
     });
 
     console.log(`Expanded to ${allEvents.length} total events (${expanded.length} from recurring, ${validOneOffs.length} one-off)`);
