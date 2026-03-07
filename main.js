@@ -1,4 +1,5 @@
 require('dotenv').config();
+const path = require('path');
 const { extractText } = require('./pdf_extractor');
 const { parseSyllabus } = require('./llm_parser');
 const { processOneOffs } = require('./date_expander');
@@ -12,9 +13,18 @@ async function run(pdfPath) {
         process.exit(1);
     }
 
-    // Stage 1: Extract text from PDF
-    console.log('\n--- Stage 1: PDF Extraction ---');
-    const text = await extractText(pdfPath);
+    // Stage 1: Extract text (PDF or Text)
+    console.log('\n--- Stage 1: Extraction ---');
+    let text;
+    const ext = path.extname(pdfPath).toLowerCase();
+
+    if (ext === '.txt') {
+        const fs = require('fs');
+        text = fs.readFileSync(pdfPath, 'utf8');
+        console.log(`Loaded ${text.length} characters from ${path.basename(pdfPath)}`);
+    } else {
+        text = await extractText(pdfPath);
+    }
 
     // Stage 2: Get quarter dates
     console.log('\n--- Stage 2: Quarter Date Range ---');
@@ -34,7 +44,7 @@ async function run(pdfPath) {
 
     let totalCreated = 0;
     const allFailures = [];
-
+    
     // Create recurring events as RRULE series (one API call per pattern)
     if (result.recurring.length > 0 && quarterStart && quarterEnd) {
         console.log(`\nCreating ${result.recurring.length} recurring event series...`);
@@ -45,6 +55,7 @@ async function run(pdfPath) {
             quarterStart,
             quarterEnd
         );
+        console.log(`  Created recurring: ${pattern.title} (${days}) — ${created}/${recurringPatterns.length}`);
         totalCreated += recurResult.created;
         allFailures.push(...recurResult.failed);
     }
@@ -55,6 +66,7 @@ async function run(pdfPath) {
     if (oneOffEvents.length > 0) {
         console.log(`\nCreating ${oneOffEvents.length} one-off events...`);
         const oneOffResult = await createEvents(auth, oneOffEvents);
+        console.log()
         totalCreated += oneOffResult.created;
         allFailures.push(...oneOffResult.failed);
     }
