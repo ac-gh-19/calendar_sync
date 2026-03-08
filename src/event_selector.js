@@ -1,4 +1,4 @@
-const { prompt } = require('./utils');
+const { prompt, abbreviateDays } = require('./utils');
 
 /**
  * Displays parsed events and lets the user select which ones to keep.
@@ -19,7 +19,7 @@ async function selectEvents(llmResult) {
         console.log('\n  Recurring Events:');
         console.log('  ' + '-'.repeat(60));
         recurring.forEach((e, i) => {
-            const days = e.days.join(', ');
+            const days = abbreviateDays(e.days);
             const loc = e.location ? ` @ ${e.location}` : '';
             const startTime = e.start_time || 'TBD';
             const endTime = e.end_time || 'TBD';

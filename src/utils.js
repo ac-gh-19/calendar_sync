@@ -18,4 +18,15 @@ function prompt(question) {
     });
 }
 
-module.exports = { prompt };
+/** Maps full day names to short abbreviations. */
+const DAY_ABBREV = {
+    monday: 'Mon', tuesday: 'Tue', wednesday: 'Wed', thursday: 'Thu',
+    friday: 'Fri', saturday: 'Sat', sunday: 'Sun'
+};
+
+/** Converts an array of full day names to abbreviated, comma-separated string. */
+function abbreviateDays(days) {
+    return (days || []).map(d => DAY_ABBREV[d.toLowerCase()] || d).join(', ');
+}
+
+module.exports = { prompt, abbreviateDays };

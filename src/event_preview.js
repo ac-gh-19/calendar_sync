@@ -1,16 +1,13 @@
-const { prompt } = require('./utils');
+const { prompt, abbreviateDays } = require('./utils');
 
-/** Pads a string to a fixed width. */
+
 function pad(str, width) {
     return str.length >= width ? str.slice(0, width) : str + ' '.repeat(width - str.length);
 }
-
-/** Truncates a string and adds ellipsis if needed. */
 function truncate(str, max) {
     return str.length > max ? str.slice(0, max - 1) + '…' : str;
 }
 
-/** Formats start/end time into a display string. */
 function formatTime(start, end) {
     if (!start || !end) return 'TBD';
     return `${start} - ${end}`;
@@ -38,7 +35,7 @@ function printEventSummary(result, quarterStart, quarterEnd) {
         console.log('  ' + pad('#', 4) + pad('Title', 28) + pad('Days', 18) + pad('Time', 15) + 'Type');
         console.log('  ' + line);
         recurring.forEach((e, i) => {
-            const days = (e.days || []).join(', ');
+            const days = abbreviateDays(e.days);
             const time = formatTime(e.start_time, e.end_time);
             console.log('  ' + pad(String(i + 1), 4) + pad(truncate(e.title, 26), 28) + pad(days, 18) + pad(time, 15) + (e.type || ''));
         });
