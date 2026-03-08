@@ -1,7 +1,6 @@
 require('dotenv').config();
-const Anthropic = require('@anthropic-ai/sdk');
 
-const client = new Anthropic();
+const LLMProvider = require('./providers/llm_provider');
 
 const SYSTEM_PROMPT = `You are a schedule extraction assistant. Given the text of a course syllabus and the quarter date range, extract ALL schedule information into a structured JSON object.
 
@@ -46,52 +45,48 @@ Rules:
 - If no events of a type exist, use an empty array.`;
 
 /**
- * Parses syllabus text using Claude to extract structured schedule data.
+ * Parses syllabus text using an LLM to extract structured schedule data.
+ * @param {LLMProvider} provider - The LLM provider instance
  * @param {string} text - Raw syllabus text
  * @param {string} quarterStart - Quarter start date (YYYY-MM-DD)
  * @param {string} quarterEnd - Quarter end date (YYYY-MM-DD)
  * @returns {Promise<Object>} Structured schedule JSON
  */
-async function parseSyllabus(text, quarterStart, quarterEnd) {
-    let userMessage = `Extract the schedule from this syllabus.\n\nThe academic quarter runs from ${quarterStart} to ${quarterEnd}. Use these dates to resolve any relative date references (e.g. "Week 1" starts on ${quarterStart}).\n\nSyllabus text:\n\n${text}`;
+async function parseSyllabus(provider, text, quarterStart, quarterEnd) {
+  let userMessage = `Extract the schedule from this syllabus.\n\nThe academic quarter runs from ${quarterStart} to ${quarterEnd}. Use these dates to resolve any relative date references (e.g. "Week 1" starts on ${quarterStart}).\n\nSyllabus text:\n\n${text}`;
 
-    console.log('Sending syllabus to Claude for parsing...');
+  console.log('Sending syllabus to LLM for parsing...');
 
-    const response = await client.messages.create({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4096,
-        messages: [
-            {
-                role: 'user',
-                content: userMessage
-            }
-        ],
-        system: SYSTEM_PROMPT
-    });
+  let rawText = '';
 
-    const rawText = response.content[0].text;
+  try {
+    rawText = await provider.generate(SYSTEM_PROMPT, userMessage);
+  } catch (err) {
+    throw new Error(`LLM generation error: ${err.message}`);
+  }
 
-    // Parse JSON response
-    let parsed;
-    try {
-        parsed = JSON.parse(rawText);
-    } catch (err) {
-        console.error('Claude returned non-JSON response:');
-        console.error(rawText.substring(0, 500));
-        throw new Error(
-            `Failed to parse Claude response as JSON: ${err.message}. ` +
-            'The model may have included markdown or preamble. Check the raw output above.'
-        );
-    }
+  // Parse JSON response
+  let parsed;
+  try {
+    parsed = JSON.parse(rawText);
+  } catch (err) {
+    const modelName = provider.constructor.name || 'LLM';
+    console.error(`${modelName} returned non-JSON response:`);
+    console.error(rawText ? rawText.substring(0, 500) : 'undefined');
+    throw new Error(
+      `Failed to parse ${modelName} response as JSON: ${err.message}. ` +
+      'The model may have included markdown or preamble. Check the raw output above.'
+    );
+  }
 
-    // Validate required fields
-    if (!Array.isArray(parsed.recurring)) parsed.recurring = [];
-    if (!Array.isArray(parsed.one_off)) parsed.one_off = [];
-    if (!Array.isArray(parsed.exceptions)) parsed.exceptions = [];
+  // Validate required fields
+  if (!Array.isArray(parsed.recurring)) parsed.recurring = [];
+  if (!Array.isArray(parsed.one_off)) parsed.one_off = [];
+  if (!Array.isArray(parsed.exceptions)) parsed.exceptions = [];
 
-    console.log(`Parsed ${parsed.recurring.length} recurring patterns, ${parsed.one_off.length} one-off events, ${parsed.exceptions.length} exceptions`);
+  console.log(`Parsed ${parsed.recurring.length} recurring patterns, ${parsed.one_off.length} one-off events, ${parsed.exceptions.length} exceptions`);
 
-    return parsed;
+  return parsed;
 }
 
 module.exports = { parseSyllabus };

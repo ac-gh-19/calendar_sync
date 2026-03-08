@@ -2,6 +2,8 @@ require('dotenv').config();
 const path = require('path');
 const { extractText } = require('./pdf_extractor');
 const { parseSyllabus } = require('./llm_parser');
+const AnthropicProvider = require('./providers/anthropic_provider');
+const OllamaProvider = require('./providers/ollama_provider');
 const { processOneOffs } = require('./date_expander');
 const { authorize, createEvents, createRecurringEvents } = require('./calendar_client');
 const { getQuarterDates } = require('./cli');
@@ -30,9 +32,16 @@ async function run(pdfPath) {
     console.log('\n--- Stage 2: Quarter Date Range ---');
     const { start: quarterStart, end: quarterEnd } = await getQuarterDates();
 
-    // Stage 3: Parse with Claude
+    // Stage 3: Parse with LLM
     console.log('\n--- Stage 3: LLM Parsing ---');
-    let result = await parseSyllabus(text, quarterStart, quarterEnd);
+    const providerName = process.env.LLM_PROVIDER?.toLowerCase() || 'ollama';
+    let provider;
+    if (providerName === 'anthropic') {
+        provider = new AnthropicProvider();
+    } else {
+        provider = new OllamaProvider();
+    }
+    let result = await parseSyllabus(provider, text, quarterStart, quarterEnd);
 
     // Stage 4: Let user select which events to keep
     console.log('\n--- Event Selection ---');
@@ -44,7 +53,7 @@ async function run(pdfPath) {
 
     let totalCreated = 0;
     const allFailures = [];
-    
+
     // Create recurring events as RRULE series (one API call per pattern)
     if (result.recurring.length > 0 && quarterStart && quarterEnd) {
         console.log(`\nCreating ${result.recurring.length} recurring event series...`);
