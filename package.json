@@ -2,8 +2,9 @@
   "name": "syllabus-calendar-sync",
   "version": "1.0.0",
   "description": "CLI tool that parses a PDF syllabus and populates Google Calendar",
-  "main": "main.js",
+  "main": "src/main.js",
   "scripts": {
+    "start": "node src/main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

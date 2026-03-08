@@ -6,8 +6,8 @@ const http = require('http');
 const url = require('url');
 
 const SCOPES = ['https://www.googleapis.com/auth/calendar'];
-const CREDENTIALS_PATH = path.resolve(process.env.GOOGLE_CREDENTIALS_PATH || './credentials.json');
-const TOKEN_PATH = path.resolve(process.env.GOOGLE_TOKEN_PATH || './token.json');
+const CREDENTIALS_PATH = path.resolve(process.env.GOOGLE_CREDENTIALS_PATH || path.join(__dirname, '../config/credentials.json'));
+const TOKEN_PATH = path.resolve(process.env.GOOGLE_TOKEN_PATH || path.join(__dirname, '../config/token.json'));
 const TIMEZONE = process.env.DEFAULT_TIMEZONE || 'America/Los_Angeles';
 
 /**
