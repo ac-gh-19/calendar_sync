@@ -8,6 +8,7 @@ const { processOneOffs } = require('./date_expander');
 const { authorize, createEvents, createRecurringEvents } = require('./calendar_client');
 const { getQuarterDates } = require('./cli');
 const { selectEvents } = require('./event_selector');
+const { confirmEvents } = require('./event_preview');
 
 async function run(pdfPath) {
     if (!pdfPath) {
@@ -60,9 +61,17 @@ async function run(pdfPath) {
     }
     let result = await parseSyllabus(provider, text, quarterStart, quarterEnd);
 
-    // Stage 4: Let user select which events to keep
-    console.log('\n--- Event Selection ---');
-    result = await selectEvents(result);
+    // Stage 4: Event selection → summary → confirmation loop
+    const fullResult = result;
+    while (true) {
+        console.log('\n--- Event Selection ---');
+        result = await selectEvents(fullResult);
+
+        const confirmed = await confirmEvents(result, quarterStart, quarterEnd);
+        if (confirmed) break;
+
+        console.log('\n  ↩  Returning to event selection...');
+    }
 
     // Stage 5: Push to Google Calendar
     console.log('\n--- Stage 5: Google Calendar ---');

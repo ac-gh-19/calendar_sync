@@ -1,20 +1,4 @@
-const readline = require('readline');
-
-/**
- * Prompts the user for a single line of input.
- */
-function prompt(question) {
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-    });
-    return new Promise((resolve) => {
-        rl.question(question, (answer) => {
-            rl.close();
-            resolve(answer.trim());
-        });
-    });
-}
+const { prompt } = require('./utils');
 
 /**
  * Displays parsed events and lets the user select which ones to keep.
