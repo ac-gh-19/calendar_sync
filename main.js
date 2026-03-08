@@ -40,6 +40,23 @@ async function run(pdfPath) {
         provider = new AnthropicProvider();
     } else {
         provider = new OllamaProvider();
+
+        // Pre-flight check: make sure Ollama is actually running
+        const ollamaBase = process.env.OLLAMA_URL || 'http://localhost:11434';
+        const healthUrl = ollamaBase.replace(/\/api\/chat\/?$/, '') + '/api/tags';
+        try {
+            const res = await fetch(healthUrl);
+            if (!res.ok) throw new Error(`status ${res.status}`);
+        } catch (err) {
+            console.error(
+                `\nOllama is not running at ${ollamaBase}\n` +
+                `   To fix this:\n` +
+                `     1. Start Ollama:  ollama serve\n` +
+                `     2. Pull a model:  ollama pull ${process.env.OLLAMA_MODEL || 'qwen2.5:7b-instruct'}\n` +
+                `   Or switch to Anthropic by setting LLM_PROVIDER=anthropic in your .env`
+            );
+            process.exit(1);
+        }
     }
     let result = await parseSyllabus(provider, text, quarterStart, quarterEnd);
 
