@@ -1,4 +1,4 @@
-const { prompt, abbreviateDays } = require('./utils');
+const { prompt, abbreviateDays, displayEventList } = require('./utils');
 
 /**
  * Displays parsed events and lets the user select which ones to keep.
@@ -14,36 +14,11 @@ async function selectEvents(llmResult) {
         return llmResult;
     }
 
-    // --- Display recurring events ---
-    if (recurring.length > 0) {
-        console.log('\n  Recurring Events:');
-        console.log('  ' + '-'.repeat(60));
-        recurring.forEach((e, i) => {
-            const days = abbreviateDays(e.days);
-            const loc = e.location ? ` @ ${e.location}` : '';
-            const startTime = e.start_time || 'TBD';
-            const endTime = e.end_time || 'TBD';
-            const skipWarning = (startTime === 'TBD' || endTime === 'TBD') ? ' [⚠️ SKIPS ON UPLOAD]' : '';
-            console.log(`  [${i + 1}] ${e.title} — ${days} ${startTime}-${endTime} [${e.type}]${loc}${skipWarning}`);
-        });
-    }
-
-    // --- Display one-off events ---
-    if (oneOff.length > 0) {
-        const offset = recurring.length;
-        console.log('\n  One-Off Events:');
-        console.log('  ' + '-'.repeat(60));
-        oneOff.forEach((e, i) => {
-            const date = e.date || 'TBD';
-            const loc = e.location ? ` @ ${e.location}` : '';
-            const startTime = e.start_time || 'TBD';
-            const endTime = e.end_time || 'TBD';
-            const skipWarning = (date === 'TBD' || startTime === 'TBD' || endTime === 'TBD') ? ' [⚠️ SKIPS ON UPLOAD]' : '';
-            console.log(`  [${offset + i + 1}] ${e.title} — ${date} ${startTime}-${endTime} [${e.type}]${loc}${skipWarning}`);
-        });
-    }
+    displayEventList(recurring, oneOff);
 
     console.log('\n  Total: ' + (recurring.length + oneOff.length) + ' events found');
+    console.log('  💡 Events marked [⚠️ SKIPS ON UPLOAD] have missing required fields.');
+    console.log('     You will be able to edit them after selection.');
     console.log('  ' + '-'.repeat(60));
 
     // --- Prompt for selection (with validation loop) ---

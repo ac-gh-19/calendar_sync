@@ -9,6 +9,8 @@ const { authorize, createEvents, createRecurringEvents } = require('./calendar_c
 const { getQuarterDates } = require('./cli');
 const { selectEvents } = require('./event_selector');
 const { confirmEvents } = require('./event_preview');
+const { editEvents } = require('./event_editor');
+const { prompt } = require('./utils');
 
 async function run(pdfPath) {
     if (!pdfPath) {
@@ -67,8 +69,30 @@ async function run(pdfPath) {
         console.log('\n--- Event Selection ---');
         result = await selectEvents(fullResult);
 
+        console.log('\n--- Event Editor ---');
+        result = await editEvents(result);
+
+        if (result === null) {
+            console.log('\n  ↩  Returning to event selection...');
+            continue;
+        }
+
         const confirmed = await confirmEvents(result, quarterStart, quarterEnd);
-        if (confirmed) break;
+        if (confirmed) {
+            // Prompt for an optional class name prefix
+            console.log('\n--- Class Name ---');
+            const className = await prompt('  Enter a class name to prepend to each event (e.g. CS166), or press Enter to skip: ');
+            if (className) {
+                for (const e of result.recurring || []) {
+                    e.title = `${className} ${e.title}`;
+                }
+                for (const e of result.one_off || []) {
+                    e.title = `${className} ${e.title}`;
+                }
+                console.log(`  Prepended "${className}" to all event titles.`);
+            }
+            break;
+        }
 
         console.log('\n  ↩  Returning to event selection...');
     }
