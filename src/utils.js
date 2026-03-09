@@ -60,6 +60,8 @@ function displayEventList(recurring, oneOff) {
             console.log(`  [${offset + i + 1}] ${e.title} — ${date} ${startTime}-${endTime} [${e.type}]${loc}${skipWarning}`);
         });
     }
+
+    console.log('\n');
 }
 
 module.exports = { prompt, abbreviateDays, displayEventList };

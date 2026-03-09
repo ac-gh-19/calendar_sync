@@ -4,7 +4,7 @@ const { extractText } = require('./pdf_extractor');
 const { parseSyllabus } = require('./llm_parser');
 const AnthropicProvider = require('./providers/anthropic_provider');
 const OllamaProvider = require('./providers/ollama_provider');
-const { processOneOffs } = require('./date_expander');
+const { processOneOffs } = require('./one_off_processor')
 const { authorize, createEvents, createRecurringEvents } = require('./calendar_client');
 const { getQuarterDates } = require('./cli');
 const { selectEvents } = require('./event_selector');
@@ -70,7 +70,7 @@ async function run(pdfPath) {
         result = await selectEvents(fullResult);
 
         console.log('\n--- Event Editor ---');
-        result = await editEvents(result);
+        result = await editEvents(result, quarterStart, quarterEnd);
 
         if (result === null) {
             console.log('\n  ↩  Returning to event selection...');

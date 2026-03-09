@@ -1,16 +1,15 @@
+const { isValidDate, isValidTime } = require('./validators');
+
 /**
  * Filters and validates one-off events.
  * @param {Array} oneOffRaw - Raw one-off events from LLM
  * @returns {Array} Validated one-off events with formatted fields
  */
 function processOneOffs(oneOffRaw) {
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    const timeRegex = /^\d{2}:\d{2}$/;
-
     const validOneOffs = (oneOffRaw || [])
         .filter(e => {
-            const hasDate = e.date && typeof e.date === 'string' && dateRegex.test(e.date);
-            const hasTime = e.start_time && timeRegex.test(e.start_time) && e.end_time && timeRegex.test(e.end_time);
+            const hasDate = e.date && typeof e.date === 'string' && isValidDate(e.date);
+            const hasTime = e.start_time && isValidTime(e.start_time) && e.end_time && isValidTime(e.end_time);
             return hasDate && hasTime;
         })
         .map(e => ({
