@@ -1,4 +1,4 @@
-const { prompt, abbreviateDays, displayEventList } = require('./utils');
+const { prompt, abbreviateDays, displayEventList, printInfo, printSuccess } = require('./utils');
 
 /**
  * Displays parsed events and lets the user select which ones to keep.
@@ -16,9 +16,8 @@ async function selectEvents(llmResult) {
 
     displayEventList(recurring, oneOff);
 
-    console.log('\n  Total: ' + (recurring.length + oneOff.length) + ' events found');
-    console.log('  [INFO] Events marked \x1b[31m[SKIPS ON UPLOAD]\x1b[0m have missing required fields.');
-    console.log('     You will be able to edit them after selection.');
+    printInfo('Events marked \x1b[31m[SKIPS ON UPLOAD]\x1b[0m have missing required fields.');
+    printInfo('You will be able to edit them after selection.');
     console.log('  ' + '-'.repeat(60));
 
     // --- Prompt for selection (with validation loop) ---
@@ -86,7 +85,7 @@ async function selectEvents(llmResult) {
         const offset = recurring.length;
         const filteredOneOff = oneOff.filter((_, i) => selected.has(offset + i + 1));
 
-        console.log(`  Keeping ${filteredRecurring.length} recurring + ${filteredOneOff.length} one-off events`);
+        printSuccess(`Keeping ${filteredRecurring.length} recurring + ${filteredOneOff.length} one-off events`);
 
         return {
             ...llmResult,

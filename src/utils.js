@@ -100,4 +100,68 @@ function displayEventList(recurring, oneOff) {
     console.log('\n');
 }
 
-module.exports = { prompt, findSyllabusFiles, showSpinner, abbreviateDays, displayEventList };
+/** ANSI Color Codes */
+const COLORS = {
+    reset: '\x1b[0m',
+    bright: '\x1b[1m',
+    red: '\x1b[31m',
+    green: '\x1b[32m',
+    yellow: '\x1b[33m',
+    blue: '\x1b[34m',
+    magenta: '\x1b[35m',
+    cyan: '\x1b[36m',
+    white: '\x1b[37m',
+};
+
+/**
+ * Prints a formatted section header.
+ * @param {string} text 
+ */
+function printHeader(text) {
+    console.log(`\n\n${COLORS.bright}${COLORS.cyan}=== ${text.toUpperCase()} ===${COLORS.reset}\n`);
+}
+
+/**
+ * Prints a success message.
+ * @param {string} text 
+ */
+function printSuccess(text) {
+    console.log(`${COLORS.green}✔ ${text}${COLORS.reset}`);
+}
+
+/**
+ * Prints an informational message.
+ * @param {string} text 
+ */
+function printInfo(text) {
+    console.log(`${COLORS.yellow}ℹ ${text}${COLORS.reset}`);
+}
+
+/**
+ * Prints an error message.
+ * @param {string} text 
+ */
+function printError(text) {
+    console.log(`${COLORS.red}✖ ${text}${COLORS.reset}`);
+}
+
+/**
+ * Adds vertical spacing.
+ */
+function spacing() {
+    console.log('\n');
+}
+
+module.exports = {
+    prompt,
+    findSyllabusFiles,
+    showSpinner,
+    abbreviateDays,
+    displayEventList,
+    printHeader,
+    printSuccess,
+    printInfo,
+    printError,
+    spacing,
+    COLORS
+};

@@ -1,15 +1,1 @@
---- Log started at 2026-03-10T02:45:47.903Z ---
-[2026-03-10T02:45:51.531Z] [DEBUG] --- Stage 1: Extraction ---
-[2026-03-10T02:45:51.534Z] [DEBUG] Loaded 2023 characters from syllabus.txt
-[2026-03-10T02:45:51.534Z] [DEBUG] --- Stage 3: LLM Parsing ---
-[2026-03-10T02:45:51.535Z] [DEBUG] Sending syllabus to LLM for parsing...
-[2026-03-10T02:45:55.520Z] [DEBUG] LLM Raw Output (first 200 chars): {
-  "recurring": [
-    {
-      "title": "General Physics Lecture",
-      "days": ["tuesday", "thursday"],
-      "start_time": "09:30",
-      "end_time": "10:50",
-      "type": "lecture",
-      "locati...
-[2026-03-10T02:45:55.521Z] [DEBUG] Parsed 1 recurring patterns, 2 one-off events, 0 exceptions
+--- Log started at 2026-03-10T03:40:47.859Z ---

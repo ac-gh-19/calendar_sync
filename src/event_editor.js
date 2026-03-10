@@ -1,4 +1,4 @@
-const { prompt, abbreviateDays, displayEventList } = require('./utils');
+const { prompt, abbreviateDays, displayEventList, printInfo, printSuccess, printError, COLORS } = require('./utils');
 const { FieldConfig } = require('./field_config');
 const { isValidTime, isValidDate, isValidDay, isValidType, VALID_DAYS, VALID_TYPES } = require('./validators');
 
@@ -46,7 +46,7 @@ async function getEditedValidatedEventFieldValue(field, value) {
     while (true) {
         const newFieldVal = await prompt(config.getPrompt(currentFieldValue));
         if (!newFieldVal) {
-            console.log(`  Keeping current ${field}: ${currentFieldValue}`);
+            printInfo(`Keeping current ${field}: ${currentFieldValue}`);
             return value; // keep current
         }
 
@@ -60,7 +60,7 @@ async function getEditedValidatedEventFieldValue(field, value) {
                 VALID_DAYS
             });
         } catch (error) {
-            console.log(error.message);
+            printError(error.message);
         }
     }
 }
@@ -102,7 +102,7 @@ async function editSingleEvent(event, isRecurring, quarterStart, quarterEnd) {
         console.log('  ┌─────────────────────────────────────');
         for (let i = 0; i < fields.length; i++) {
             const f = fields[i];
-            const missing = isFieldMissing(event, f, isRecurring) ? ' \x1b[31mREQUIRED\x1b[0m' : '';
+            const missing = isFieldMissing(event, f, isRecurring) ? ` ${COLORS.bright}${COLORS.red}REQUIRED${COLORS.reset}` : '';
             console.log(`  │  [${i + 1}] ${f}: ${displayEventFieldValue(f, event[f])}${missing}`);
         }
         console.log('  └─────────────────────────────────────');
@@ -113,7 +113,7 @@ async function editSingleEvent(event, isRecurring, quarterStart, quarterEnd) {
 
         const fieldNum = Number(fieldInput);
         if (isNaN(fieldNum) || fieldNum < 1 || fieldNum > fields.length) {
-            console.log(`  Invalid. Enter a number between 1 and ${fields.length}.`);
+            printError(`Invalid. Enter a number between 1 and ${fields.length}.`);
             continue;
         }
 
@@ -123,17 +123,17 @@ async function editSingleEvent(event, isRecurring, quarterStart, quarterEnd) {
             newFieldValue = await getEditedValidatedEventFieldValue(fieldName, event[fieldName]);
             if (fieldName === "date") {
                 if (newFieldValue < quarterStart || newFieldValue > quarterEnd) {
-                    console.log(`  [ERROR] Date is outside the ${quarterStart} - ${quarterEnd} range.`);
+                    printError(`Date is outside the ${quarterStart} - ${quarterEnd} range.`);
                     continue;
                 }
             } else if (fieldName === "start_time") {
                 if (newFieldValue > event.end_time) {
-                    console.log('  [ERROR] Start time must be before end time.');
+                    printError('Start time must be before end time.');
                     continue;
                 }
             } else if (fieldName === "end_time") {
                 if (newFieldValue < event.start_time) {
-                    console.log('  [ERROR] End time must be after start time.');
+                    printError('End time must be after start time.');
                     continue;
                 }
             }
@@ -141,7 +141,7 @@ async function editSingleEvent(event, isRecurring, quarterStart, quarterEnd) {
             break;
         }
         event[fieldName] = newFieldValue;
-        console.log(`  [SUCCESS] Updated ${fieldName} → ${displayEventFieldValue(fieldName, event[fieldName])}`);
+        printSuccess(`Updated ${fieldName} → ${displayEventFieldValue(fieldName, event[fieldName])}`);
     }
 }
 
@@ -172,11 +172,12 @@ async function editEvents(result, quarterStart, quarterEnd) {
         });
 
         if (incomplete.length > 0) {
-            console.log('  [WARNING] The following events still have missing required fields:');
+            printInfo('The following events still have missing required fields:');
             for (const w of incomplete) {
                 console.log(`     [${w.num}] ${w.title}`);
             }
-            console.log('  These events MUST be edited before continuing.\n');
+            printError('These events MUST be edited before continuing.');
+            console.log('');
         }
 
         const hint = incomplete.length === 0
@@ -190,7 +191,7 @@ async function editEvents(result, quarterStart, quarterEnd) {
 
         if (!input) {
             if (incomplete.length > 0) {
-                console.log(`  [ERROR] Cannot continue — ${incomplete.length} event(s) still have missing required fields. Please edit them first or type "back" to return to selection.`);
+                printError(`Cannot continue — ${incomplete.length} event(s) still have missing required fields. Please edit them first or type "back" to return to selection.`);
                 continue;
             }
             break; // all good, continue to confirmation
@@ -198,7 +199,7 @@ async function editEvents(result, quarterStart, quarterEnd) {
 
         const num = Number(input);
         if (isNaN(num) || num < 1 || num > total) {
-            console.log(`  Invalid selection. Enter a number between 1 and ${total}.`);
+            printError(`Invalid selection. Enter a number between 1 and ${total}.`);
             continue;
         }
 
@@ -212,7 +213,7 @@ async function editEvents(result, quarterStart, quarterEnd) {
             isRecurring = false;
         }
 
-        console.log(`\n  Editing: ${event.title}`);
+        printInfo(`Editing: ${event.title}`);
 
         // Field edit loop for this event
         await editSingleEvent(event, isRecurring, quarterStart, quarterEnd);

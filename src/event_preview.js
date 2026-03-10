@@ -1,4 +1,4 @@
-const { prompt, abbreviateDays } = require('./utils');
+const { prompt, abbreviateDays, printHeader, printInfo, printError, COLORS } = require('./utils');
 
 
 function pad(str, width) {
@@ -21,18 +21,15 @@ function printEventSummary(result, quarterStart, quarterEnd) {
     const oneOff = result.one_off || [];
     const exceptions = result.exceptions || [];
 
-    const line = '─'.repeat(78);
-    const doubleLine = '═'.repeat(78);
+    printHeader('Event Summary — Review before pushing to Google Calendar');
 
-    console.log('\n' + doubleLine);
-    console.log('  [SUMMARY] Event Summary — Review before pushing to Google Calendar');
-    console.log(doubleLine);
+    const line = '─'.repeat(78);
 
     // Recurring events table
     if (recurring.length > 0) {
-        console.log('\n  Recurring Events');
+        console.log(`\n  ${COLORS.bright}Recurring Events${COLORS.reset}`);
         console.log('  ' + line);
-        console.log('  ' + pad('#', 4) + pad('Title', 28) + pad('Days', 18) + pad('Time', 15) + 'Type');
+        console.log('  ' + COLORS.bright + pad('#', 4) + pad('Title', 28) + pad('Days', 18) + pad('Time', 15) + 'Type' + COLORS.reset);
         console.log('  ' + line);
         recurring.forEach((e, i) => {
             const days = abbreviateDays(e.days);
@@ -43,9 +40,9 @@ function printEventSummary(result, quarterStart, quarterEnd) {
 
     // One-off events table
     if (oneOff.length > 0) {
-        console.log('\n  One-Off Events');
+        console.log(`\n  ${COLORS.bright}One-Off Events${COLORS.reset}`);
         console.log('  ' + line);
-        console.log('  ' + pad('#', 4) + pad('Title', 28) + pad('Date', 18) + pad('Time', 15) + 'Type');
+        console.log('  ' + COLORS.bright + pad('#', 4) + pad('Title', 28) + pad('Date', 18) + pad('Time', 15) + 'Type' + COLORS.reset);
         console.log('  ' + line);
         oneOff.forEach((e, i) => {
             const date = e.date || 'TBD';
@@ -56,7 +53,7 @@ function printEventSummary(result, quarterStart, quarterEnd) {
 
     // Exceptions
     if (exceptions.length > 0) {
-        console.log('\n  Exceptions (excluded dates)');
+        console.log(`\n  ${COLORS.bright}Exceptions (excluded dates)${COLORS.reset}`);
         console.log('  ' + line);
         exceptions.forEach(exc => {
             console.log(`    ${exc.date}  —  ${exc.reason}`);
@@ -65,9 +62,8 @@ function printEventSummary(result, quarterStart, quarterEnd) {
 
     // Summary footer
     console.log('\n  ' + line);
-    console.log(`  Total: ${recurring.length} recurring series + ${oneOff.length} one-off events`);
-    console.log(`  Quarter: ${quarterStart} → ${quarterEnd}`);
-    console.log(doubleLine);
+    console.log(`  ${COLORS.bright}Total: ${recurring.length} recurring series + ${oneOff.length} one-off events${COLORS.reset}`);
+    printInfo(`Quarter: ${quarterStart} → ${quarterEnd}`);
 }
 
 /**
@@ -85,7 +81,7 @@ async function confirmEvents(result, quarterStart, quarterEnd) {
         if (answer === 'n' || answer === 'no') {
             return false;
         }
-        console.log('  [WARNING] Invalid input. Please enter "y" or "n".');
+        printError('Invalid input. Please enter "y" or "n".');
     }
 }
 

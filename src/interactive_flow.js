@@ -3,7 +3,7 @@ const { authorize, createEvents, createRecurringEvents } = require('./calendar_c
 const { selectEvents } = require('./event_selector');
 const { confirmEvents } = require('./event_preview');
 const { editEvents } = require('./event_editor');
-const { prompt } = require('./utils');
+const { prompt, printHeader, printInfo, printSuccess, spacing } = require('./utils');
 
 /**
  * Orchestrates the interactive flow for a single parsed syllabus result.
@@ -15,21 +15,22 @@ async function processSyllabus(result, quarterStart, quarterEnd) {
     // Stage 4: Event selection → summary → confirmation loop
     const fullResult = result;
     while (true) {
-        console.log('\n--- Event Selection ---');
+        printHeader('Event Selection');
         result = await selectEvents(fullResult);
 
-        console.log('\n--- Event Editor ---');
+        printHeader('Event Editor');
         result = await editEvents(result, quarterStart, quarterEnd);
 
         if (result === null) {
-            console.log('\n  [INFO] Returning to event selection...');
+            printInfo('Returning to event selection...');
+            spacing();
             continue;
         }
 
         const confirmed = await confirmEvents(result, quarterStart, quarterEnd);
         if (confirmed) {
             // Prompt for an optional class name prefix
-            console.log('\n--- Class Name ---');
+            printHeader('Class Name');
             const className = await prompt('  Enter a class name to prepend to each event (e.g. CS166), or press Enter to skip: ');
             if (className) {
                 for (const e of result.recurring || []) {
@@ -38,16 +39,17 @@ async function processSyllabus(result, quarterStart, quarterEnd) {
                 for (const e of result.one_off || []) {
                     e.title = `${className} ${e.title}`;
                 }
-                console.log(`  Prepended "${className}" to all event titles.`);
+                printSuccess(`Prepended "${className}" to all event titles.`);
             }
             break;
         }
 
-        console.log('\n  [INFO] Returning to event selection...');
+        printInfo('Returning to event selection...');
+        spacing();
     }
 
     // Stage 5: Push to Google Calendar
-    console.log('\n--- Stage 5: Google Calendar ---');
+    printHeader('Stage 5: Google Calendar');
     const auth = await authorize();
 
     let totalCreated = 0;
@@ -85,7 +87,7 @@ async function processSyllabus(result, quarterStart, quarterEnd) {
         }
     }
 
-    console.log(`\nDone! Created ${totalCreated} calendar entries (${result.recurring.length} recurring series + ${oneOffEvents.length} one-off).`);
+    printSuccess(`Done! Created ${totalCreated} calendar entries (${result.recurring.length} recurring series + ${oneOffEvents.length} one-off).`);
 }
 
 module.exports = { processSyllabus };
