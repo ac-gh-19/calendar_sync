@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { PDFParse } = require('pdf-parse');
+const logger = require('./logger');
 
 /**
  * Extracts raw text from a PDF file.
@@ -38,7 +39,7 @@ async function extractText(pdfPath) {
         );
     }
 
-    console.log(`Extracted ${fullText.length} characters from ${path.basename(pdfPath)} (${numPages} pages)`);
+    logger.debug(`Extracted ${fullText.length} characters from ${path.basename(pdfPath)} (${numPages} pages)`);
     return fullText;
 }
 

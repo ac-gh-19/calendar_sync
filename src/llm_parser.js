@@ -1,6 +1,7 @@
 require('dotenv').config();
 
 const LLMProvider = require('./providers/llm_provider');
+const logger = require('./logger');
 
 const SYSTEM_PROMPT = `You are a schedule extraction assistant. Given the text of a course syllabus and the quarter date range, extract ALL schedule information into a structured JSON object.
 
@@ -55,13 +56,15 @@ Rules:
 async function parseSyllabus(provider, text, quarterStart, quarterEnd) {
   let userMessage = `Extract the schedule from this syllabus.\n\nThe academic quarter runs from ${quarterStart} to ${quarterEnd}. Use these dates to resolve any relative date references (e.g. "Week 1" starts on ${quarterStart}).\n\nSyllabus text:\n\n${text}`;
 
-  console.log('Sending syllabus to LLM for parsing...');
+  logger.debug('Sending syllabus to LLM for parsing...');
 
   let rawText = '';
 
   try {
     rawText = await provider.generate(SYSTEM_PROMPT, userMessage);
+    logger.debug(`LLM Raw Output (first 200 chars): ${rawText.substring(0, 200)}...`);
   } catch (err) {
+    logger.error('LLM generation error', err);
     throw new Error(`LLM generation error: ${err.message}`);
   }
 
@@ -71,11 +74,11 @@ async function parseSyllabus(provider, text, quarterStart, quarterEnd) {
     parsed = JSON.parse(rawText);
   } catch (err) {
     const modelName = provider.constructor.name || 'LLM';
-    console.error(`${modelName} returned non-JSON response:`);
-    console.error(rawText ? rawText.substring(0, 500) : 'undefined');
+    logger.error(`${modelName} returned non-JSON response`, err);
+    logger.debug(`Raw response causing failure: ${rawText}`);
     throw new Error(
       `Failed to parse ${modelName} response as JSON: ${err.message}. ` +
-      'The model may have included markdown or preamble. Check the raw output above.'
+      'The model may have included markdown or preamble. Check the raw output in debug.log.'
     );
   }
 
@@ -84,7 +87,7 @@ async function parseSyllabus(provider, text, quarterStart, quarterEnd) {
   if (!Array.isArray(parsed.one_off)) parsed.one_off = [];
   if (!Array.isArray(parsed.exceptions)) parsed.exceptions = [];
 
-  console.log(`Parsed ${parsed.recurring.length} recurring patterns, ${parsed.one_off.length} one-off events, ${parsed.exceptions.length} exceptions`);
+  logger.debug(`Parsed ${parsed.recurring.length} recurring patterns, ${parsed.one_off.length} one-off events, ${parsed.exceptions.length} exceptions`);
 
   return parsed;
 }

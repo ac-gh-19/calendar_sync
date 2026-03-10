@@ -33,6 +33,7 @@ function displayEventFieldValue(field, value) {
  */
 async function getEditedValidatedEventFieldValue(field, value) {
     const currentFieldValue = displayEventFieldValue(field, value);
+    // behavior for each field is defined in field_config.js
     const config = FieldConfig[field];
 
     if (!config) return value;
@@ -44,7 +45,10 @@ async function getEditedValidatedEventFieldValue(field, value) {
 
     while (true) {
         const newFieldVal = await prompt(config.getPrompt(currentFieldValue));
-        if (!newFieldVal) return value; // keep current
+        if (!newFieldVal) {
+            console.log(`  Keeping current ${field}: ${currentFieldValue}`);
+            return value; // keep current
+        }
 
         try {
             return config.validateAndParse(newFieldVal, {

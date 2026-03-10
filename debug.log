@@ -1,0 +1,43 @@
+--- Log started at 2026-03-10T01:30:49.071Z ---
+[2026-03-10T01:30:56.024Z] [DEBUG] [BatchProcessor] Starting batch processing for 3 files (concurrency: 2)
+[2026-03-10T01:30:56.025Z] [DEBUG] [BatchProcessor] START parsing: syllabus.pdf
+[2026-03-10T01:30:56.070Z] [DEBUG] [BatchProcessor] START parsing: syllabus.txt
+[2026-03-10T01:30:56.071Z] [DEBUG] Sending syllabus to LLM for parsing...
+[2026-03-10T01:30:56.228Z] [DEBUG] Extracted 12561 characters from syllabus.pdf (6 pages)
+[2026-03-10T01:30:56.228Z] [DEBUG] Sending syllabus to LLM for parsing...
+[2026-03-10T01:30:59.827Z] [DEBUG] LLM Raw Output (first 200 chars): {
+  "recurring": [
+    {
+      "title": "General Physics Lecture",
+      "days": ["tuesday", "thursday"],
+      "start_time": "09:30",
+      "end_time": "10:50",
+      "type": "lecture",
+      "locati...
+[2026-03-10T01:30:59.828Z] [DEBUG] Parsed 1 recurring patterns, 2 one-off events, 0 exceptions
+[2026-03-10T01:30:59.828Z] [DEBUG] [BatchProcessor] END parsing: syllabus.txt (Took 3.76s)
+[2026-03-10T01:30:59.828Z] [DEBUG] [BatchProcessor] START parsing: test.pdf
+[2026-03-10T01:30:59.886Z] [DEBUG] Extracted 12561 characters from test.pdf (6 pages)
+[2026-03-10T01:30:59.887Z] [DEBUG] Sending syllabus to LLM for parsing...
+[2026-03-10T01:31:09.478Z] [DEBUG] LLM Raw Output (first 200 chars): {
+  "recurring": [
+    {
+      "title": "Lecture",
+      "days": ["tuesday", "thursday"],
+      "start_time": "17:00",
+      "end_time": "18:20",
+      "type": "lecture",
+      "location": "Bourns Hal...
+[2026-03-10T01:31:09.478Z] [DEBUG] Parsed 8 recurring patterns, 7 one-off events, 6 exceptions
+[2026-03-10T01:31:09.479Z] [DEBUG] [BatchProcessor] END parsing: syllabus.pdf (Took 13.45s)
+[2026-03-10T01:31:12.302Z] [DEBUG] LLM Raw Output (first 200 chars): {
+  "recurring": [
+    {
+      "title": "Logic Design Lecture",
+      "days": ["tuesday", "thursday"],
+      "start_time": "17:00",
+      "end_time": "18:20",
+      "type": "lecture",
+      "location"...
+[2026-03-10T01:31:12.303Z] [DEBUG] Parsed 8 recurring patterns, 7 one-off events, 6 exceptions
+[2026-03-10T01:31:12.303Z] [DEBUG] [BatchProcessor] END parsing: test.pdf (Took 12.47s)

@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const readline = require('readline');
 
 /**
@@ -16,6 +18,40 @@ function prompt(question) {
             resolve(answer.trim());
         });
     });
+}
+
+/**
+ * Discovers syllabus files (.pdf, .txt) in a directory.
+ * @param {string} dirPath 
+ * @returns {string[]} Array of absolute file paths
+ */
+function findSyllabusFiles(dirPath) {
+    const files = fs.readdirSync(dirPath);
+    return files
+        .filter(f => {
+            const ext = path.extname(f).toLowerCase();
+            return ext === '.pdf' || ext === '.txt';
+        })
+        .map(f => path.resolve(dirPath, f));
+}
+
+/**
+ * A simple ASCII spinner for waiting states.
+ */
+function showSpinner(message) {
+    const chars = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+    let i = 0;
+    process.stdout.write('\x1B[?25l'); // Hide cursor
+    const interval = setInterval(() => {
+        process.stdout.write(`\r${chars[i]} ${message}`);
+        i = (i + 1) % chars.length;
+    }, 100);
+
+    return () => {
+        clearInterval(interval);
+        process.stdout.write('\r\x1B[K'); // Clear line
+        process.stdout.write('\x1B[?25h'); // Show cursor
+    };
 }
 
 /** Maps full day names to short abbreviations. */
@@ -64,4 +100,4 @@ function displayEventList(recurring, oneOff) {
     console.log('\n');
 }
 
-module.exports = { prompt, abbreviateDays, displayEventList };
+module.exports = { prompt, findSyllabusFiles, showSpinner, abbreviateDays, displayEventList };
