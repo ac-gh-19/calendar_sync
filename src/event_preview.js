@@ -76,8 +76,17 @@ function printEventSummary(result, quarterStart, quarterEnd) {
  */
 async function confirmEvents(result, quarterStart, quarterEnd) {
     printEventSummary(result, quarterStart, quarterEnd);
-    const answer = (await prompt('\n  Push these events to Google Calendar? (y/n): ')).toLowerCase();
-    return answer === 'y' || answer === 'yes';
+
+    while (true) {
+        const answer = (await prompt('\n  Push these events to Google Calendar? (y/n): ')).toLowerCase().trim();
+        if (answer === 'y' || answer === 'yes') {
+            return true;
+        }
+        if (answer === 'n' || answer === 'no') {
+            return false;
+        }
+        console.log('  ⚠️  Invalid input. Please enter "y" or "n".');
+    }
 }
 
 module.exports = { printEventSummary, confirmEvents };
