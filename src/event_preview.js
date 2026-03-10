@@ -25,12 +25,12 @@ function printEventSummary(result, quarterStart, quarterEnd) {
     const doubleLine = '═'.repeat(78);
 
     console.log('\n' + doubleLine);
-    console.log('  📋  Event Summary — Review before pushing to Google Calendar');
+    console.log('  [SUMMARY] Event Summary — Review before pushing to Google Calendar');
     console.log(doubleLine);
 
     // Recurring events table
     if (recurring.length > 0) {
-        console.log('\n  📅  Recurring Events');
+        console.log('\n  Recurring Events');
         console.log('  ' + line);
         console.log('  ' + pad('#', 4) + pad('Title', 28) + pad('Days', 18) + pad('Time', 15) + 'Type');
         console.log('  ' + line);
@@ -43,7 +43,7 @@ function printEventSummary(result, quarterStart, quarterEnd) {
 
     // One-off events table
     if (oneOff.length > 0) {
-        console.log('\n  📌  One-Off Events');
+        console.log('\n  One-Off Events');
         console.log('  ' + line);
         console.log('  ' + pad('#', 4) + pad('Title', 28) + pad('Date', 18) + pad('Time', 15) + 'Type');
         console.log('  ' + line);
@@ -56,7 +56,7 @@ function printEventSummary(result, quarterStart, quarterEnd) {
 
     // Exceptions
     if (exceptions.length > 0) {
-        console.log('\n  🚫  Exceptions (excluded dates)');
+        console.log('\n  Exceptions (excluded dates)');
         console.log('  ' + line);
         exceptions.forEach(exc => {
             console.log(`    ${exc.date}  —  ${exc.reason}`);
@@ -85,7 +85,7 @@ async function confirmEvents(result, quarterStart, quarterEnd) {
         if (answer === 'n' || answer === 'no') {
             return false;
         }
-        console.log('  ⚠️  Invalid input. Please enter "y" or "n".');
+        console.log('  [WARNING] Invalid input. Please enter "y" or "n".');
     }
 }
 

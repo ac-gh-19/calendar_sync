@@ -17,7 +17,7 @@ const FieldConfig = {
             const days = input.split(',').map(d => d.trim().toLowerCase());
             const invalid = days.filter(d => !context.isValidDay(d));
             if (invalid.length > 0) {
-                throw new Error(`    ❌ Invalid day(s): ${invalid.join(', ')}. Try again.`);
+                throw new Error(`    [ERROR] Invalid day(s): ${invalid.join(', ')}. Try again.`);
             }
             return days;
         },
@@ -28,7 +28,7 @@ const FieldConfig = {
         getPrompt: (currentFieldValue) => `    New date (YYYY-MM-DD) [${currentFieldValue}]: `,
         validateAndParse: (input, context) => {
             if (!context.isValidDate(input)) {
-                throw new Error('    ❌ Invalid format. Use YYYY-MM-DD (e.g. 2026-03-15). Try again.');
+                throw new Error('    [ERROR] Invalid format. Use YYYY-MM-DD (e.g. 2026-03-15). Try again.');
             }
             return input;
         }
@@ -38,7 +38,7 @@ const FieldConfig = {
         getPrompt: (currentFieldValue) => `    New start time (HH:MM) [${currentFieldValue}]: `,
         validateAndParse: (input, context) => {
             if (!context.isValidTime(input)) {
-                throw new Error('    ❌ Invalid format. Use HH:MM in 24-hour format (e.g. 09:30, 14:00). Try again.');
+                throw new Error('    [ERROR] Invalid format. Use HH:MM in 24-hour format (e.g. 09:30, 14:00). Try again.');
             }
             return input;
         }
@@ -48,7 +48,7 @@ const FieldConfig = {
         getPrompt: (currentFieldValue) => `    New end time (HH:MM) [${currentFieldValue}]: `,
         validateAndParse: (input, context) => {
             if (!context.isValidTime(input)) {
-                throw new Error('    ❌ Invalid format. Use HH:MM in 24-hour format (e.g. 09:30, 14:00). Try again.');
+                throw new Error('    [ERROR] Invalid format. Use HH:MM in 24-hour format (e.g. 09:30, 14:00). Try again.');
             }
             return input;
         }
@@ -59,7 +59,7 @@ const FieldConfig = {
         validateAndParse: (input, context) => {
             const normalized = input.trim().toLowerCase();
             if (!context.isValidType(normalized)) {
-                throw new Error(`    ❌ Invalid type "${input}". Choose from: ${context.VALID_TYPES.join(', ')}. Try again.`);
+                throw new Error(`    [ERROR] Invalid type "${input}". Choose from: ${context.VALID_TYPES.join(', ')}. Try again.`);
             }
             return normalized;
         },

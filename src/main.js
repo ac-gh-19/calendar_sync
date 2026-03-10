@@ -8,6 +8,7 @@ const { findSyllabusFiles, showSpinner } = require('./utils');
 const { BatchProcessor, States } = require('./batch_processor');
 const { getProvider } = require('./providers/factory');
 const { processSyllabus } = require('./interactive_flow');
+const logger = require('./logger');
 
 async function run(inputPath) {
     if (!inputPath) {
@@ -51,7 +52,7 @@ async function run(inputPath) {
             console.log(`==================================================`);
 
             if (item.state === States.ERROR) {
-                console.error(`  ⚠️  Skipping ${item.basename} due to parsing error: ${item.error}`);
+                console.error(`  [ERROR] Skipping ${item.basename} due to parsing error: ${item.error}`);
                 item.state = States.DONE;
                 continue;
             }

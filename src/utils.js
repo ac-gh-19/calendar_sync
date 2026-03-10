@@ -78,7 +78,7 @@ function displayEventList(recurring, oneOff) {
             const loc = e.location ? ` @ ${e.location}` : '';
             const startTime = e.start_time || 'TBD';
             const endTime = e.end_time || 'TBD';
-            const skipWarning = (days.length === 0 || startTime === 'TBD' || endTime === 'TBD') ? ' [⚠️ SKIPS ON UPLOAD]' : '';
+            const skipWarning = (days.length === 0 || startTime === 'TBD' || endTime === 'TBD') ? ' \x1b[31m[SKIPS ON UPLOAD]\x1b[0m' : '';
             console.log(`  [${i + 1}] ${e.title} — ${days} ${startTime}-${endTime} [${e.type}]${loc}${skipWarning}`);
         });
     }
@@ -92,7 +92,7 @@ function displayEventList(recurring, oneOff) {
             const loc = e.location ? ` @ ${e.location}` : '';
             const startTime = e.start_time || 'TBD';
             const endTime = e.end_time || 'TBD';
-            const skipWarning = (date === 'TBD' || startTime === 'TBD' || endTime === 'TBD') ? ' [⚠️ SKIPS ON UPLOAD]' : '';
+            const skipWarning = (date === 'TBD' || startTime === 'TBD' || endTime === 'TBD') ? ' \x1b[31m[SKIPS ON UPLOAD]\x1b[0m' : '';
             console.log(`  [${offset + i + 1}] ${e.title} — ${date} ${startTime}-${endTime} [${e.type}]${loc}${skipWarning}`);
         });
     }

@@ -22,7 +22,7 @@ async function processSyllabus(result, quarterStart, quarterEnd) {
         result = await editEvents(result, quarterStart, quarterEnd);
 
         if (result === null) {
-            console.log('\n  ↩  Returning to event selection...');
+            console.log('\n  [INFO] Returning to event selection...');
             continue;
         }
 
@@ -43,7 +43,7 @@ async function processSyllabus(result, quarterStart, quarterEnd) {
             break;
         }
 
-        console.log('\n  ↩  Returning to event selection...');
+        console.log('\n  [INFO] Returning to event selection...');
     }
 
     // Stage 5: Push to Google Calendar

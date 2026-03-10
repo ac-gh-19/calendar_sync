@@ -102,7 +102,7 @@ async function editSingleEvent(event, isRecurring, quarterStart, quarterEnd) {
         console.log('  ┌─────────────────────────────────────');
         for (let i = 0; i < fields.length; i++) {
             const f = fields[i];
-            const missing = isFieldMissing(event, f, isRecurring) ? ' ⚠️  REQUIRED' : '';
+            const missing = isFieldMissing(event, f, isRecurring) ? ' \x1b[31mREQUIRED\x1b[0m' : '';
             console.log(`  │  [${i + 1}] ${f}: ${displayEventFieldValue(f, event[f])}${missing}`);
         }
         console.log('  └─────────────────────────────────────');
@@ -123,17 +123,17 @@ async function editSingleEvent(event, isRecurring, quarterStart, quarterEnd) {
             newFieldValue = await getEditedValidatedEventFieldValue(fieldName, event[fieldName]);
             if (fieldName === "date") {
                 if (newFieldValue < quarterStart || newFieldValue > quarterEnd) {
-                    console.log(`  ❌ Date is outside the ${quarterStart} - ${quarterEnd} range.`);
+                    console.log(`  [ERROR] Date is outside the ${quarterStart} - ${quarterEnd} range.`);
                     continue;
                 }
             } else if (fieldName === "start_time") {
                 if (newFieldValue > event.end_time) {
-                    console.log('  ❌ Start time must be before end time.');
+                    console.log('  [ERROR] Start time must be before end time.');
                     continue;
                 }
             } else if (fieldName === "end_time") {
                 if (newFieldValue < event.start_time) {
-                    console.log('  ❌ End time must be after start time.');
+                    console.log('  [ERROR] End time must be after start time.');
                     continue;
                 }
             }
@@ -141,7 +141,7 @@ async function editSingleEvent(event, isRecurring, quarterStart, quarterEnd) {
             break;
         }
         event[fieldName] = newFieldValue;
-        console.log(`  ✅ Updated ${fieldName} → ${displayEventFieldValue(fieldName, event[fieldName])}`);
+        console.log(`  [SUCCESS] Updated ${fieldName} → ${displayEventFieldValue(fieldName, event[fieldName])}`);
     }
 }
 
@@ -172,7 +172,7 @@ async function editEvents(result, quarterStart, quarterEnd) {
         });
 
         if (incomplete.length > 0) {
-            console.log('  🚫 The following events still have missing required fields:');
+            console.log('  [WARNING] The following events still have missing required fields:');
             for (const w of incomplete) {
                 console.log(`     [${w.num}] ${w.title}`);
             }
@@ -190,7 +190,7 @@ async function editEvents(result, quarterStart, quarterEnd) {
 
         if (!input) {
             if (incomplete.length > 0) {
-                console.log(`  ❌ Cannot continue — ${incomplete.length} event(s) still have missing required fields. Please edit them first or type "back" to return to selection.`);
+                console.log(`  [ERROR] Cannot continue — ${incomplete.length} event(s) still have missing required fields. Please edit them first or type "back" to return to selection.`);
                 continue;
             }
             break; // all good, continue to confirmation

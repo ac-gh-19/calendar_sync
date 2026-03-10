@@ -17,7 +17,7 @@ async function selectEvents(llmResult) {
     displayEventList(recurring, oneOff);
 
     console.log('\n  Total: ' + (recurring.length + oneOff.length) + ' events found');
-    console.log('  💡 Events marked [⚠️ SKIPS ON UPLOAD] have missing required fields.');
+    console.log('  [INFO] Events marked \x1b[31m[SKIPS ON UPLOAD]\x1b[0m have missing required fields.');
     console.log('     You will be able to edit them after selection.');
     console.log('  ' + '-'.repeat(60));
 

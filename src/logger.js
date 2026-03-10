@@ -40,7 +40,7 @@ class Logger {
     error(message, err = null) {
         const fullMessage = err ? `${message}: ${err.message}\n${err.stack}` : message;
         this._write('error', fullMessage);
-        console.error(`  ⚠️  ${message}`);
+        console.error(`  [ERROR] ${message}`);
     }
 }
 
