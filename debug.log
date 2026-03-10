@@ -1,6 +1,1 @@
---- Log started at 2026-03-10T10:33:12.969Z ---
-[2026-03-10T10:33:20.040Z] [DEBUG] [BatchProcessor] Starting batch processing for 4 files (concurrency: 2)
-[2026-03-10T10:33:20.041Z] [DEBUG] [BatchProcessor] START parsing: bio301_syllabus.txt
-[2026-03-10T10:33:20.042Z] [DEBUG] Sending syllabus to LLM for parsing...
-[2026-03-10T10:33:20.047Z] [DEBUG] [BatchProcessor] START parsing: cs101_syllabus.txt
-[2026-03-10T10:33:20.048Z] [DEBUG] Sending syllabus to LLM for parsing...
+--- Log started at 2026-03-10T10:37:29.538Z ---
