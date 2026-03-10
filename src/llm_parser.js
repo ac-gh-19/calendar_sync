@@ -59,27 +59,39 @@ async function parseSyllabus(provider, text, quarterStart, quarterEnd) {
   logger.debug('Sending syllabus to LLM for parsing...');
 
   let rawText = '';
-
-  try {
-    rawText = await provider.generate(SYSTEM_PROMPT, userMessage);
-    logger.debug(`LLM Raw Output (first 200 chars): ${rawText.substring(0, 200)}...`);
-  } catch (err) {
-    logger.error('LLM generation error', err);
-    throw new Error(`LLM generation error: ${err.message}`);
-  }
-
-  // Parse JSON response
   let parsed;
-  try {
-    parsed = JSON.parse(rawText);
-  } catch (err) {
-    const modelName = provider.constructor.name || 'LLM';
-    logger.error(`${modelName} returned non-JSON response`, err);
-    logger.debug(`Raw response causing failure: ${rawText}`);
-    throw new Error(
-      `Failed to parse ${modelName} response as JSON: ${err.message}. ` +
-      'The model may have included markdown or preamble. Check the raw output in debug.log.'
-    );
+  let attempts = 0;
+  const MAX_ATTEMPTS = 2;
+
+  while (attempts < MAX_ATTEMPTS) {
+    try {
+      rawText = await provider.generate(SYSTEM_PROMPT, userMessage);
+      logger.debug(`LLM Raw Output (first 200 chars): ${rawText.substring(0, 200)}...`);
+    } catch (err) {
+      logger.error('LLM generation error', err);
+      throw new Error(`LLM generation error: ${err.message}`);
+    }
+
+    // Parse JSON response
+    try {
+      parsed = JSON.parse(rawText);
+      break; // Success, exit retry loop
+    } catch (err) {
+      attempts++;
+      const modelName = provider.constructor.name || 'LLM';
+      logger.error(`${modelName} returned non-JSON response on attempt ${attempts}`, err);
+
+      if (attempts >= MAX_ATTEMPTS) {
+        logger.debug(`Raw response causing failure: ${rawText}`);
+        throw new Error(
+          `Failed to parse ${modelName} response as JSON: ${err.message}. ` +
+          'The model may have included markdown or preamble. Check the raw output in debug.log.'
+        );
+      }
+
+      logger.debug('Sending malformed output back to LLM for correction...');
+      userMessage = `Your previous response was not valid JSON. Here is what you returned:\n\n${rawText}\n\nPlease return only valid JSON matching the required schema. The original syllabus text was:\n\n${text}`;
+    }
   }
 
   // Validate required fields

@@ -1,1 +1,19 @@
---- Log started at 2026-03-10T03:40:47.859Z ---
+--- Log started at 2026-03-10T10:00:05.160Z ---
+[2026-03-10T10:00:11.651Z] [DEBUG] [BatchProcessor] Starting batch processing for 4 files (concurrency: 2)
+[2026-03-10T10:00:11.652Z] [DEBUG] [BatchProcessor] START parsing: bio301_syllabus.txt
+[2026-03-10T10:00:11.652Z] [DEBUG] Sending syllabus to LLM for parsing...
+[2026-03-10T10:00:11.656Z] [DEBUG] [BatchProcessor] START parsing: cs101_syllabus.txt
+[2026-03-10T10:00:11.658Z] [DEBUG] Sending syllabus to LLM for parsing...
+[2026-03-10T10:02:11.137Z] [DEBUG] LLM Raw Output (first 200 chars): {
+  "recurring": [
+    {
+      "title": "lecture",
+      "days": ["monday", "wednesday"],
+      "start_time": "10:00",
+      "end_time": "11:30",
+      "type": "lecture",
+      "location": "engineerin...
+[2026-03-10T10:02:11.138Z] [DEBUG] Parsed 2 recurring patterns, 2 one-off events, 3 exceptions
+[2026-03-10T10:02:11.138Z] [DEBUG] [BatchProcessor] END parsing: cs101_syllabus.txt (Took 119.48s)
+[2026-03-10T10:02:11.138Z] [DEBUG] [BatchProcessor] START parsing: eng110_syllabus.txt
+[2026-03-10T10:02:11.139Z] [DEBUG] Sending syllabus to LLM for parsing...
