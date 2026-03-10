@@ -1,4 +1,5 @@
-const { prompt, abbreviateDays, displayEventList, printInfo, printSuccess } = require('./utils');
+const { prompt } = require('../utils/prompt');
+const { abbreviateDays, displayEventList, printInfo, printSuccess } = require('../terminal/display');
 
 /**
  * Displays parsed events and lets the user select which ones to keep.

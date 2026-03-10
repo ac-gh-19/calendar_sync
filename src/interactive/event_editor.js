@@ -1,6 +1,7 @@
-const { prompt, abbreviateDays, displayEventList, printInfo, printSuccess, printError, COLORS } = require('./utils');
-const { FieldConfig } = require('./field_config');
-const { isValidTime, isValidDate, isValidDay, isValidType, VALID_DAYS, VALID_TYPES } = require('./validators');
+const { prompt } = require('../utils/prompt');
+const { abbreviateDays, displayEventList, printInfo, printSuccess, printError, COLORS } = require('../terminal/display');
+const { FieldConfig } = require('../field_config');
+const { isValidTime, isValidDate, isValidDay, isValidType, VALID_DAYS, VALID_TYPES } = require('../utils/validators');
 
 /**
  * Determines which fields are editable for a given event.
@@ -87,11 +88,11 @@ function isFieldMissing(event, field, isRecurring) {
     if (!config || !config.isRequired(isRecurring)) return false;
 
     switch (field) {
-        case 'days':       return !event.days || event.days.length === 0;
-        case 'date':       return !event.date || !isValidDate(event.date);
+        case 'days': return !event.days || event.days.length === 0;
+        case 'date': return !event.date || !isValidDate(event.date);
         case 'start_time': return !event.start_time || !isValidTime(event.start_time);
-        case 'end_time':   return !event.end_time || !isValidTime(event.end_time);
-        default:           return !event[field];
+        case 'end_time': return !event.end_time || !isValidTime(event.end_time);
+        default: return !event[field];
     }
 }
 

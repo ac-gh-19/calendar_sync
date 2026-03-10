@@ -1,4 +1,4 @@
-const { prompt } = require('./utils');
+const { prompt } = require('./utils/prompt');
 
 /**
  * Field configuration schema 

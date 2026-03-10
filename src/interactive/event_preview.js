@@ -1,4 +1,5 @@
-const { prompt, abbreviateDays, printHeader, printInfo, printError, COLORS } = require('./utils');
+const { prompt } = require('../utils/prompt');
+const { abbreviateDays, printHeader, printInfo, printError, COLORS } = require('../terminal/display');
 
 
 function pad(str, width) {

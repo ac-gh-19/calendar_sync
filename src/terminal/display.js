@@ -1,39 +1,15 @@
-const fs = require('fs');
-const path = require('path');
-const readline = require('readline');
-
-/**
- * Prompts the user for a single line of input.
- * @param {string} question - The prompt text to display
- * @returns {Promise<string>} The user's trimmed input
- */
-function prompt(question) {
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-    });
-    return new Promise((resolve) => {
-        rl.question(question, (answer) => {
-            rl.close();
-            resolve(answer.trim());
-        });
-    });
-}
-
-/**
- * Discovers syllabus files (.pdf, .txt) in a directory.
- * @param {string} dirPath 
- * @returns {string[]} Array of absolute file paths
- */
-function findSyllabusFiles(dirPath) {
-    const files = fs.readdirSync(dirPath);
-    return files
-        .filter(f => {
-            const ext = path.extname(f).toLowerCase();
-            return ext === '.pdf' || ext === '.txt';
-        })
-        .map(f => path.resolve(dirPath, f));
-}
+/** ANSI Color Codes */
+const COLORS = {
+    reset: '\x1b[0m',
+    bright: '\x1b[1m',
+    red: '\x1b[31m',
+    green: '\x1b[32m',
+    yellow: '\x1b[33m',
+    blue: '\x1b[34m',
+    magenta: '\x1b[35m',
+    cyan: '\x1b[36m',
+    white: '\x1b[37m',
+};
 
 /**
  * A simple ASCII spinner for waiting states.
@@ -100,19 +76,6 @@ function displayEventList(recurring, oneOff) {
     console.log('\n');
 }
 
-/** ANSI Color Codes */
-const COLORS = {
-    reset: '\x1b[0m',
-    bright: '\x1b[1m',
-    red: '\x1b[31m',
-    green: '\x1b[32m',
-    yellow: '\x1b[33m',
-    blue: '\x1b[34m',
-    magenta: '\x1b[35m',
-    cyan: '\x1b[36m',
-    white: '\x1b[37m',
-};
-
 /**
  * Prints a formatted section header.
  * @param {string} text 
@@ -153,8 +116,6 @@ function spacing() {
 }
 
 module.exports = {
-    prompt,
-    findSyllabusFiles,
     showSpinner,
     abbreviateDays,
     displayEventList,

@@ -1,14 +1,15 @@
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
-const { extractText } = require('./pdf_extractor');
-const { parseSyllabus } = require('./llm_parser');
-const { getQuarterDates } = require('./cli');
-const { findSyllabusFiles, showSpinner } = require('./utils');
-const { BatchProcessor, States } = require('./batch_processor');
+const { extractText } = require('./utils/pdf_extractor');
+const { parseSyllabus } = require('./processing/llm_parser');
+const { getQuarterDates } = require('./terminal/date_prompt');
+const { findSyllabusFiles } = require('./utils/files');
+const { showSpinner } = require('./terminal/display');
+const { BatchProcessor, States } = require('./processing/batch_processor');
 const { getProvider } = require('./providers/factory');
-const { processSyllabus } = require('./interactive_flow');
-const logger = require('./logger');
+const { processSyllabus } = require('./interactive/interactive_flow');
+const logger = require('./utils/logger');
 
 async function run(inputPath) {
     if (!inputPath) {

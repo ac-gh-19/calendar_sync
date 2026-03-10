@@ -1,4 +1,4 @@
-const { isValidDate, isValidTime } = require('./validators');
+const { isValidDate, isValidTime } = require('../utils/validators');
 
 /**
  * Filters and validates one-off events.

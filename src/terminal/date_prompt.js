@@ -1,4 +1,4 @@
-const { prompt } = require('./utils');
+const { prompt } = require('../utils/prompt');
 
 /**
  * Validates a date string is in YYYY-MM-DD format and is a real date.

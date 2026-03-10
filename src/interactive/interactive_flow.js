@@ -1,9 +1,10 @@
-const { processOneOffs } = require('./one_off_processor');
-const { authorize, createEvents, createRecurringEvents } = require('./calendar_client');
+const { processOneOffs } = require('../processing/one_off_processor');
+const { authorize, createEvents, createRecurringEvents } = require('../calendar/calendar_client');
 const { selectEvents } = require('./event_selector');
 const { confirmEvents } = require('./event_preview');
 const { editEvents } = require('./event_editor');
-const { prompt, printHeader, printInfo, printSuccess, spacing } = require('./utils');
+const { prompt } = require('../utils/prompt');
+const { printHeader, printInfo, printSuccess, spacing } = require('../terminal/display');
 
 /**
  * Orchestrates the interactive flow for a single parsed syllabus result.

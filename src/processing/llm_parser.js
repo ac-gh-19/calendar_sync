@@ -1,7 +1,7 @@
 require('dotenv').config();
 
-const LLMProvider = require('./providers/llm_provider');
-const logger = require('./logger');
+const LLMProvider = require('../providers/llm_provider');
+const logger = require('../utils/logger');
 
 const SYSTEM_PROMPT = `You are a schedule extraction assistant. Given the text of a course syllabus and the quarter date range, extract ALL schedule information into a structured JSON object.
 

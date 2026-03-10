@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
-const { extractText } = require('./pdf_extractor');
+const { extractText } = require('../utils/pdf_extractor');
 const { parseSyllabus } = require('./llm_parser');
-const logger = require('./logger');
+const logger = require('../utils/logger');
 
 /**
  * States for each file in the batch
@@ -22,7 +22,7 @@ class BatchProcessor {
         this.quarterStart = quarterStart;
         this.quarterEnd = quarterEnd;
         this.concurrency = concurrency;
-        
+
         // Initialize state for each file
         this.items = filePaths.map(filePath => ({
             path: filePath,
@@ -78,7 +78,7 @@ class BatchProcessor {
 
             item.result = await parseSyllabus(this.provider, text, this.quarterStart, this.quarterEnd);
             item.state = States.READY;
-            
+
             if (this.onReadyCallback) {
                 const cb = this.onReadyCallback;
                 this.onReadyCallback = null;
@@ -103,7 +103,7 @@ class BatchProcessor {
             item.endTime = new Date();
             const duration = ((item.endTime - item.startTime) / 1000).toFixed(2);
             logger.debug(`[BatchProcessor] END parsing: ${item.basename} (Took ${duration}s)`);
-            
+
             this.activeCount--;
             this._processNext();
         }
