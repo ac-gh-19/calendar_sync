@@ -1,7 +1,8 @@
 const LLMProvider = require('./llm_provider');
+const config = require('../config');
 
 class AnthropicProvider extends LLMProvider {
-  constructor(model = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-20250514') {
+  constructor(model = config.llm.anthropicModel) {
     super();
     this.model = model;
     const Anthropic = require('@anthropic-ai/sdk');

@@ -1,7 +1,8 @@
 const LLMProvider = require('./llm_provider');
+const config = require('../config');
 
 class OllamaProvider extends LLMProvider {
-  constructor(url = process.env.OLLAMA_URL || 'http://localhost:11434/api/chat', model = process.env.OLLAMA_MODEL || 'qwen2.5:7b-instruct') {
+  constructor(url = config.llm.ollamaUrl, model = config.llm.ollamaModel) {
     super();
     this.url = url;
     this.model = model;

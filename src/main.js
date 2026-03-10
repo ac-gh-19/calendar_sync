@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('./config'); // Load and validate environment variables on boot
 const { run } = require('./runner');
 
 const inputPath = process.argv[2];

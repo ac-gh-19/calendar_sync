@@ -1,14 +1,14 @@
-require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const { google } = require('googleapis');
 const http = require('http');
 const url = require('url');
+const config = require('../config');
 
 const SCOPES = ['https://www.googleapis.com/auth/calendar'];
-const CREDENTIALS_PATH = path.resolve(process.env.GOOGLE_CREDENTIALS_PATH || path.join(__dirname, '../config/credentials.json'));
-const TOKEN_PATH = path.resolve(process.env.GOOGLE_TOKEN_PATH || path.join(__dirname, '../config/token.json'));
-const TIMEZONE = process.env.DEFAULT_TIMEZONE || 'America/Los_Angeles';
+const CREDENTIALS_PATH = config.google.credentialsPath;
+const TOKEN_PATH = config.google.tokenPath;
+const TIMEZONE = config.timezone;
 
 /**
  * Creates an authenticated Google OAuth2 client.
