@@ -79,11 +79,12 @@ class BatchProcessor {
             item.result = await parseSyllabus(this.provider, text, this.quarterStart, this.quarterEnd);
             item.state = States.READY;
             
-            this.readyFiles.push(item);
             if (this.onReadyCallback) {
                 const cb = this.onReadyCallback;
                 this.onReadyCallback = null;
                 cb(item);
+            } else {
+                this.readyFiles.push(item);
             }
         } catch (err) {
             logger.error(`[BatchProcessor] ERROR parsing ${item.basename}: ${err.message}`, err);
@@ -91,11 +92,12 @@ class BatchProcessor {
             item.error = err.message;
 
             // Even if it's an error, we want to signal "ready" so the main loop can skip/report it
-            this.readyFiles.push(item);
             if (this.onReadyCallback) {
                 const cb = this.onReadyCallback;
                 this.onReadyCallback = null;
                 cb(item);
+            } else {
+                this.readyFiles.push(item);
             }
         } finally {
             item.endTime = new Date();
